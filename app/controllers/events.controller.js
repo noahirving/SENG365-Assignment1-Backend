@@ -25,6 +25,16 @@ exports.list = async function(req, res) {
 
 exports.create = async function(req, res) {
 
+    const title = req.body.categoryIds,
+        description = req.body.description,
+        categoryIds = req.body.categoryIds;
+
+    // Checks all field are not 'null' or 'undefined'
+    if (title && description && categoryIds) {
+        const capacity = req.body.
+    }
+
+
 }
 
 exports.read = async function(req, res) {
