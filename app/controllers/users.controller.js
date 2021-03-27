@@ -1,10 +1,10 @@
 const Users = require("../models/users.model");
 const schema = require("../controllers/schemas");
-const Validator = require("jsonschema").Validator;
-const v = new Validator();
+/*const Validator = require("jsonschema").Validator;
+const v = new Validator();*/
 
 exports.register = async function (req, res) {
-    const errors = v.validate(req.body, schema.RegisterUser).errors;
+    const errors = schema.getValidator().validate(req.body, schema.RegisterUser).errors;
     // If there's at least one error in req.body #BAD REQUEST
     if (errors.length > 0) {
         badRequest(errors[0].stack, res);
