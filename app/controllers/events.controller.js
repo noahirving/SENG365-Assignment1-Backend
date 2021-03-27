@@ -31,7 +31,7 @@ exports.create = async function(req, res) {
 
     // Checks all field are not 'null' or 'undefined'
     if (title && description && categoryIds) {
-        const capacity = req.body.
+        //const capacity = req.body.
     }
 
 
