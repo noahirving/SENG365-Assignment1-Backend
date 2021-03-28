@@ -1,7 +1,4 @@
 const Users = require("../models/users.model");
-const schema = require("../controllers/schemas");
-//const Validator = require("jsonschema").Validator;
-//const v = new Validator();
 
 
 exports.register = async function (req, res) {
