@@ -15,6 +15,7 @@ module.exports = function () {
     app.use(bodyParser.raw({ type: 'text/plain' }));  // for the /executeSql endpoint
 
 
+    // Validates requests using API spec
     const spec = path.join(__dirname, '../app/resources/seng365_event_site_api_spec.yaml');
     app.use('/spec', express.static(spec));
     app.use(
@@ -46,11 +47,18 @@ module.exports = function () {
     require('../app/routes/events.routes')(app);
     require('../app/routes/users.routes')(app);
 
+    // Error handler
     app.use((err, req, res, next) => {
         // format errors
+        if (err.status === undefined) {
+            err.status = 500;
+            res.statusMessage = 'Error: Internal server error';
+        } else {
+            res.statusMessage = err;
+        }
+        res.status(err.status).end();
+
         console.log(err);
-        res.statusMessage = err;
-        res.status(err.status || 500).end();
     });
 
     return app;

@@ -1,7 +1,7 @@
 const Users = require("../models/users.model");
 
 
-exports.register = async function (req, res) {
+exports.register = async function (req, res, next) {
     const firstName = req.body.firstName,
         lastName = req.body.lastName,
         email = req.body.email,
@@ -10,19 +10,20 @@ exports.register = async function (req, res) {
     try {
         // If email already exists #BAD REQUEST
         if (await Users.emailExists(email)) {
-            badRequest('email already in use', res);
+            const err = new Error('email already in use');
+            err.status = 400;
+            next(err);
         } else { // User registering has been validated
             const result = await Users.create(firstName, lastName, email, password);
             res.status(201)
                 .send({userId: result.insertId});
         }
     } catch (err) { // #INTERNAL SERVER ERROR
-        res.status(500)
-            .send(err);
+        next(err);
     }
 }
 
-exports.login = async function(req, res) {
+exports.login = async function(req, res, next) {
     const email = req.body.email,
         password = req.body.password;
     try {
@@ -31,16 +32,6 @@ exports.login = async function(req, res) {
         res.status(200)
             .send(result);
     } catch (err) {
-        console.log(err);
-        res.status(500)
-            .send(err);
+        next(err);
     }
-
-}
-
-
-function badRequest(message, res) {
-    res.statusMessage = `Bad Request: ${message}`;
-    res.status(400)
-        .send();
 }
