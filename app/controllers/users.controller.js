@@ -1,5 +1,5 @@
 const Users = require("../models/users.model");
-
+const RandToken = require('rand-token');
 
 exports.register = async function (req, res, next) {
     const firstName = req.body.firstName,
@@ -28,9 +28,21 @@ exports.login = async function(req, res, next) {
         password = req.body.password;
     try {
         const result = await Users.read({"email": email, "password": password});
+        if (result.length > 0) {
+            const token = RandToken.generate(32);
 
-        res.status(200)
-            .send(result);
+
+            res.status(200)
+                .send({
+                    "userId": result[0].id,
+                    "token": token
+                });
+        } else {
+            const err = new Error('Invalid email or password')
+            err.status = 400;
+            next(err);
+        }
+
     } catch (err) {
         next(err);
     }

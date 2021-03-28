@@ -28,8 +28,26 @@ exports.read = async function (fields) {
     return result;
 }
 
-exports.update = async function () {
+exports.update = async function (data, id) {
 
+    const conn = await db.getPool();
+    let query = `
+    update user
+    set `;
+    let params = [];
+    for (key in data) {
+        if (key == 'id') continue;
+        if (params.length > 0) query += ', ';
+        query += '?? = ?';
+        params.push(key);
+        params.push(fields[key]);
+    }
+    query += `
+    where id = `;
+    params.push(id);
+
+    const [result] = await conn.query(query, params);
+    return result;
 }
 
 exports.emailExists = async function (email) {
