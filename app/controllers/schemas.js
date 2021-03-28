@@ -1,7 +1,7 @@
 const Validator = require("jsonschema").Validator;
 const v = new Validator();
-
-
+const api = require("../resources/seng365_event_site_api_spec.json");
+/*
 exports.User = {
     "title": "User",
     "id": "/User",
@@ -339,13 +339,13 @@ exports.RegisterUser = {
         'password': {'type': 'string', 'minLength': 1}
     },
     'required': ['firstName', 'lastName', 'email', 'password']
-};*/
+};
 
 exports.RegisterUser = {
     "title": "RegisterUserRequest",
     "properties": {
         "firstName": {
-            "$ref": "/User/properties/firstName"
+            "$ref": "../"
         },
         "lastName": {
             "$ref": "/User/properties/lastName"
@@ -363,11 +363,14 @@ exports.RegisterUser = {
         "email",
         "password"
     ]
-};
+};*/
 
-v.addSchema(exports.User);
-v.addSchema(exports.FullUser);
-v.addSchema(exports.RegisterUser);
+//v.addSchema(api.components.schemas.User, '/User');
+//v.addSchema(api.components.schemas.FullUser, '/FullUser');
+exports.RegisterUser = api.paths["/users/register"].post.requestBody.content["application/json"].schema, '/RegisterUser';
+v.addSchema();
+
+console.log(v.schemas);
 
 
 exports.getValidator = function () {

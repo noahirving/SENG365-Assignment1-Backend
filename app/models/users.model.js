@@ -10,8 +10,22 @@ exports.create = async function (firstName, lastName, email, password) {
     return result;
 }
 
-exports.read = async function () {
+exports.read = async function (fields) {
 
+    const conn = await db.getPool();
+    let query = `
+    select *
+    from user
+    where `;
+    let params = []
+    for (key in fields) {
+        if (params.length > 0) query += ' and ';
+        query += '?? = ?';
+        params.push(key);
+        params.push(fields[key]);
+    }
+    const [result] = await conn.query(query, params);
+    return result;
 }
 
 exports.update = async function () {
