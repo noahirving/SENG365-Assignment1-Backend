@@ -30,7 +30,6 @@ module.exports = function () {
     );
 
 
-
     // DEBUG (you can remove these)
     app.use((req, res, next) => {
         console.log(`##### ${req.method} ${req.path} #####`);
@@ -55,9 +54,10 @@ module.exports = function () {
         } else {
             res.statusMessage = err;
         }
-        res.status(err.status).end();
-
         console.log(err);
+        res.status(err.status).send('');
+
+        //console.log(err);
     });
 
     return app;

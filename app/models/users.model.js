@@ -1,53 +1,20 @@
 const db = require('../../config/db');
+const crud = require('./crud');
 
-exports.create = async function (firstName, lastName, email, password) {
-    console.log(`Request to create user '${firstName} ${lastName}', '${email}'...`);
-    const conn = db.getPool();
-    const query = `
-    insert into user (first_name, last_name, email, password)
-    values (?, ?, ?, ?)`;
-    const [result] = await conn.query(query, [firstName, lastName, email, password]);
-    return result;
+exports.create = async function (data) {
+
+    return await crud.create('user', data);
 }
 
 exports.read = async function (fields) {
+    console.log(fields);
 
-    const conn = await db.getPool();
-    let query = `
-    select *
-    from user
-    where `;
-    let params = []
-    for (key in fields) {
-        if (params.length > 0) query += ' and ';
-        query += '?? = ?';
-        params.push(key);
-        params.push(fields[key]);
-    }
-    const [result] = await conn.query(query, params);
-    return result;
+    return await crud.read('user', fields);
 }
 
 exports.update = async function (data, id) {
 
-    const conn = await db.getPool();
-    let query = `
-    update user
-    set `;
-    let params = [];
-    for (key in data) {
-        if (key == 'id') continue;
-        if (params.length > 0) query += ', ';
-        query += '?? = ?';
-        params.push(key);
-        params.push(fields[key]);
-    }
-    query += `
-    where id = `;
-    params.push(id);
-
-    const [result] = await conn.query(query, params);
-    return result;
+    return await crud.update('user', data, id);
 }
 
 exports.emailExists = async function (email) {
