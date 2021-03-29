@@ -12,7 +12,7 @@ module.exports = function (app) {
     app.route(app.rootUrl + '/events/:id')
         .get(events.getOne)
         .patch(events.update)
-        .delete(events.delete);
+        .delete(isAuthorized, events.delete);
 
 
 }

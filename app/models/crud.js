@@ -76,3 +76,27 @@ exports.update = async function (table, data, id) {
     const [result] = await conn.query(query, params);
     return result;
 }
+
+exports.delete = async function(table, fields) {
+    console.log(`Request to delete row/s from ${table}...`);
+
+    const conn = await db.getPool();
+    let params = [table]
+    let query = `
+    delete
+    from ??`;
+    if (fields) {
+        query += `where `;
+        for (let key in fields) {
+            if (params.length > 1) query += ' and ';
+            query += '?? = ?';
+            params.push(key);
+            params.push(fields[key]);
+        }
+    }
+
+    //console.log(query);
+    //console.log(params);
+    const results = await conn.query(query, params);
+    return results;
+}

@@ -79,7 +79,7 @@ exports.getOne = async function(req, res, next) {
     try {
         const [event] = await Crud.read('event', {id: id});
 
-        if (!event) next(BadRequest('event does not exist'));
+        if (!event) next(NotFound());
         else {
             const event_categories = await Crud.read('event_category', {event_id: id});
             const categories = event_categories.map(event_category => event_category.category_id);
@@ -115,8 +115,26 @@ exports.update = async function(req, res) {
 
 }
 
-exports.delete = async function(req, res) {
+exports.delete = async function(authUser, req, res, next) {
+    console.log('Request to delete an event...')
 
+    const id = parseInt(req.params.id);
+    try {
+        const [event] = await Crud.read('event', {id: id});
+
+        if (!event) {
+            next(NotFound());
+        } else if (event.organizer_id !== authUser.id) {
+            next(Forbidden());
+        } else {
+            await Crud.delete('event_attendees', {event_id: id});
+            await Crud.delete('event_category', {event_id: id});
+            await Crud.delete('event', {id: id});
+            res.status(200).send();
+        }
+    } catch (err) {
+        next(err);
+    }
 }
 
 exports.getCategories = async function(req, res, next) {
@@ -134,5 +152,19 @@ function BadRequest(message) {
     const err = new Error(message);
     err.name = 'Bad Request';
     err.status = 400;
+    return err;
+}
+
+function NotFound() {
+    const err = new Error();
+    err.name = 'Not Found';
+    err.status = 404;
+    return err;
+}
+
+function Forbidden() {
+    const err = new Error();
+    err.name = 'Forbidden';
+    err.status = 403;
     return err;
 }
