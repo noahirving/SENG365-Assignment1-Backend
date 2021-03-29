@@ -33,18 +33,18 @@ exports.read = async function (table, fields) {
     const conn = await db.getPool();
     let query = `
     select *
-    from user
+    from ??
     where `;
-    let params = []
+    let params = [table]
     for (let key in fields) {
-        if (params.length > 0) query += ' and ';
+        if (params.length > 1) query += ' and ';
         query += '?? = ?';
         params.push(key);
         params.push(fields[key]);
     }
 
-    //console.log(query);
-    //console.log(params);
+    console.log(query);
+    console.log(params);
     const [results] = await conn.query(query, params);
     return results;
 }

@@ -29,13 +29,13 @@ exports.create = async function(req, res, next) {
     const title = req.body.title,
         description = req.body.description,
         categoryIds = req.body.categoryIds,
+        date = req.body.date || new Date().toISOString(),
         isOnline = req.body.isOnline,
         url = req.body.url,
         venue = req.body.venue,
         capacity = req.body.capacity,
         requiresAttendanceControl = req.body.requiresAttendanceControl,
         fee = req.body.fee;
-    let date = req.body.date;
 
     try {
         const categoriesCount = await Events.countCategories(categoryIds);
@@ -44,11 +44,6 @@ exports.create = async function(req, res, next) {
         } /*else if (date /*&& date > current date*) {
 
         }*/ else {
-
-            if (!date) {
-                const currentDate = new Date();
-                date = currentDate.getFullYear() + '-' + currentDate.getMonth() + '-' + currentDate.getDate();
-            }
             const token = req.get('X-Authorization');
 
             const [result] = await Crud.read('user',{'auth_token': token});
@@ -80,24 +75,41 @@ exports.create = async function(req, res, next) {
     }
 }
 
-exports.read = async function(req, res) {
-    console.log('Request to read event...');
+exports.read = async function(req, res, next) {
+    console.log('Request to read an event...');
 
     const id = req.params.id;
 
     try {
-        const result = await Events.selectOne(id);
-        if (result.length === 0) {
-            res.status(404)
-                .send('Not Found');
-        } else {
-            res.status(200)
-                .send(result);
+        const [event] = await Crud.read('event', {id: id});
+
+        if (!event) next(BadRequest('event does not exist'));
+        else {
+            const event_categories = await Crud.read('event_category', {event_id: id});
+            const categories = event_categories.map(event_category => event_category.category_id);
+            const [organizer] = await Crud.read('user', {id: event.organizer_id});
+            const numAcceptedAttendees = await  Events.countAcceptedAttendees(event.id);
+
+            res.status(200).send({
+                eventId: event.id,
+                title: event.title,
+                categories: categories,
+                organizerFirstName: organizer.first_name,
+                organizerLastName: organizer.last_name,
+                numAcceptedAttendees: numAcceptedAttendees,
+                capacity: event.capacity,
+                description: event.description,
+                organizerId: event.organizer_id,
+                date: event.date,
+                isOnline: Boolean(event.is_online),
+                url: event.url,
+                venue: event.venue,
+                requiresAttendanceControl: Boolean(event.requires_attendance_control),
+                fee: event.fee
+            });
         }
     } catch (err) {
-        res.status(500)
-            .send('Internal Server Error');
-        console.log(`ERROR reading event ${id}: ${err}`);
+        next(err);
     }
 }
 
