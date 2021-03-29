@@ -43,8 +43,8 @@ exports.read = async function (table, fields) {
         params.push(fields[key]);
     }
 
-    console.log(query);
-    console.log(params);
+    //console.log(query);
+    //console.log(params);
     const [results] = await conn.query(query, params);
     return results;
 }

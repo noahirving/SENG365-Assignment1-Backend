@@ -75,11 +75,10 @@ exports.create = async function(req, res, next) {
     }
 }
 
-exports.read = async function(req, res, next) {
-    console.log('Request to read an event...');
+exports.getOne = async function(req, res, next) {
+    console.log('Request to get an event...');
 
     const id = req.params.id;
-
     try {
         const [event] = await Crud.read('event', {id: id});
 
@@ -100,12 +99,14 @@ exports.read = async function(req, res, next) {
                 capacity: event.capacity,
                 description: event.description,
                 organizerId: event.organizer_id,
-                date: event.date,
+                date: event.date.toISOString()
+                    .replace('T', ' ')
+                    .replace('Z', ''),
                 isOnline: Boolean(event.is_online),
                 url: event.url,
                 venue: event.venue,
                 requiresAttendanceControl: Boolean(event.requires_attendance_control),
-                fee: event.fee
+                fee: parseFloat(event.fee)
             });
         }
     } catch (err) {

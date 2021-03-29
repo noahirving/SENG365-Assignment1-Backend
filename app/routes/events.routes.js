@@ -7,7 +7,7 @@ module.exports = function (app) {
         .post(isAuthorized, events.create);
 
     app.route(app.rootUrl + '/events/:id')
-        .get(events.read)
+        .get(events.getOne)
         .patch(events.update)
         .delete(events.delete);
 
