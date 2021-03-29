@@ -5,16 +5,20 @@ exports.isAuthorized = async function(req, res, next) {
     console.log(`Checking authorisation...`);
 
     const authToken = req.get('X-Authorization');
-    if (authToken) {
+    try {
+        if (authToken) {
+            const [result] = await Users.read({'auth_token': authToken});
 
-        const [result] = await Users.read({'auth_token': authToken});
+            if (result) next();
+            else res.status(401).send();
 
-        if (result) next(result);
-        else res.status(401).send();
-
-    } else {
-        res.status(401).send();
+        } else {
+            res.status(401).send();
+        }
+    } catch(err) {
+        res.status(500).send();
     }
+
 }
 
 function Unauthorized() {

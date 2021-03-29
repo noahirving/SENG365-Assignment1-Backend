@@ -9,7 +9,7 @@ module.exports = function (app) {
         .post(users.login);
 
     app.route(app.rootUrl +'/users/logout')
-        .post(users.logout)
+        .post(isAuthorized, users.logout);
 
     app.route(app.rootUrl + '/users/:id')
         .get(users.getUser)

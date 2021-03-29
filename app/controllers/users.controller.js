@@ -57,22 +57,14 @@ exports.login = async function(req, res, next) {
 
 exports.logout = async function(req, res, next) {
     const token = req.get('X-Authorization');
-    if (!token) {
-        next(Unauthorized());
-    } else {
-        try {
-            const [result] = await Users.read({'auth_token': token});
-            if (!result) {
-                next(Unauthorized());
-            } else {
-                await Users.update({'auth_token': null}, {'id': result.id});
+    try {
+        const [result] = await Users.read({'auth_token': token});
+        await Users.update({'auth_token': null}, {'id': result.id});
 
-                res.status(200)
-                    .send();
-            }
-        } catch (err) {
-            next(err);
-        }
+        res.status(200)
+            .send();
+    } catch (err) {
+        next(err);
     }
 }
 
@@ -145,13 +137,6 @@ exports.updateUser = async function(req, res, next) {
     } catch(err) {
         next(err);
     }
-}
-
-function Unauthorized() {
-    const err = new Error();
-    err.name = 'Unauthorized';
-    err.status = 401;
-    return err;
 }
 
 function BadRequest(message) {
