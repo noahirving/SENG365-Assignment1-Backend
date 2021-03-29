@@ -109,9 +109,8 @@ exports.updateUser = async function(authUser, req, res, next) {
 
     if (!(firstName || lastName || email || password)) next(BadRequest('you must provide some details to update'));
 
-    const id = req.params.id;
+    const id = parseInt(req.params.id);
     try {
-
         if (authUser.id !== id) {
             next(Forbidden());
         } else {
@@ -127,7 +126,7 @@ exports.updateUser = async function(authUser, req, res, next) {
                 }
             }
             if (password) {
-                if (currentPassword === result.password) {
+                if (currentPassword === authUser.password) {
                     data.password = password;
                 } else {
                     next(BadRequest('incorrect password'));

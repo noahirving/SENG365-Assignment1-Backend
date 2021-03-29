@@ -31,16 +31,18 @@ exports.read = async function (table, fields) {
     console.log(`Request to read ${table}...`);
 
     const conn = await db.getPool();
+    let params = [table]
     let query = `
     select *
-    from ??
-    where `;
-    let params = [table]
-    for (let key in fields) {
-        if (params.length > 1) query += ' and ';
-        query += '?? = ?';
-        params.push(key);
-        params.push(fields[key]);
+    from ??`;
+    if (fields) {
+        query += `where `;
+        for (let key in fields) {
+            if (params.length > 1) query += ' and ';
+            query += '?? = ?';
+            params.push(key);
+            params.push(fields[key]);
+        }
     }
 
     //console.log(query);

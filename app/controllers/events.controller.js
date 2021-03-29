@@ -119,8 +119,15 @@ exports.delete = async function(req, res) {
 
 }
 
-exports.listCategories = async function(req, res) {
+exports.getCategories = async function(req, res, next) {
+    try {
+        const categories = await Crud.read('category');
 
+        res.status(200)
+            .send(categories);
+    } catch (err) {
+        next(err);
+    }
 }
 
 function BadRequest(message) {

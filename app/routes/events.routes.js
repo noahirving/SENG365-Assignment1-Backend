@@ -6,11 +6,13 @@ module.exports = function (app) {
         .get(events.list)
         .post(isAuthorized, events.create);
 
+    app.route(app.rootUrl + '/events/categories')
+        .get(events.getCategories);
+
     app.route(app.rootUrl + '/events/:id')
         .get(events.getOne)
         .patch(events.update)
         .delete(events.delete);
 
-    app.route(app.rootUrl + '/events/categories')
-        .get(events.listCategories);
+
 }
