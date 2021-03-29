@@ -21,7 +21,7 @@ module.exports = function () {
         OpenApiValidator.middleware({
             apiSpec: spec,
             validateRequests: true, // (default)
-            //validateResponses: true, // false by default
+            validateResponses: true, // false by default
             $refParser: {
                 mode: 'dereference'
             },

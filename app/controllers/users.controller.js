@@ -3,6 +3,8 @@ const RandToken = require('rand-token');
 const Authorize = require('../middleware/authorize');
 
 exports.register = async function (req, res, next) {
+    console.log('Request to register user...');
+
     const firstName = req.body.firstName,
         lastName = req.body.lastName,
         email = req.body.email,
@@ -30,9 +32,11 @@ exports.register = async function (req, res, next) {
 }
 
 exports.login = async function(req, res, next) {
+    console.log('Request to login...');
+
     const email = req.body.email,
         password = req.body.password;
-    console.log(email + '  ' + password);
+
     try {
         const [result] = await Users.read({"email": email, "password": password});
         if (result) {
@@ -56,6 +60,8 @@ exports.login = async function(req, res, next) {
 }
 
 exports.logout = async function(req, res, next) {
+    console.log('Request to logout...');
+
     const token = req.get('X-Authorization');
     try {
         const [result] = await Users.read({'auth_token': token});
@@ -69,25 +75,25 @@ exports.logout = async function(req, res, next) {
 }
 
 exports.getUser = async function(req, res, next) {
+    console.log('Request to get user...');
 
-    const id = req.params.id;
+    const id = req.params.id,
+        token = req.get('X-Authorization');
 
     try {
         const [result] = await Users.read({'id': id});
-        if (result) {
-            const response = {
+        if (!result) {
+            next(NotFound());
+        } else {
+            let response = {
                 firstName: result.first_name,
                 lastName: result.last_name
             };
-            const token = req.get('X-Authorization');
+
             if (result.auth_token === token) response.email = result.email;
+
             res.status(200)
                 .send(response);
-
-        } else {
-            const err = new Error('Not Found');
-            err.status = 404;
-            next(err);
         }
     } catch (err) {
         next(err);
@@ -95,7 +101,7 @@ exports.getUser = async function(req, res, next) {
 }
 
 exports.updateUser = async function(req, res, next) {
-    console.log(`Request to update user`);
+    console.log(`Request to update user...`);
 
     const firstName = req.body.firstName,
         lastName = req.body.lastName,
@@ -139,6 +145,7 @@ exports.updateUser = async function(req, res, next) {
     }
 }
 
+
 function BadRequest(message) {
     const err = new Error(message);
     err.name = 'Bad Request';
@@ -150,6 +157,13 @@ function Forbidden() {
     const err = new Error();
     err.name = 'Forbidden';
     err.status = 403;
+    return err;
+}
+
+function NotFound() {
+    const err = new Error();
+    err.name = 'Not Found';
+    err.status = 404;
     return err;
 }
 
