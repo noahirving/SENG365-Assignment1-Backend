@@ -1,6 +1,7 @@
 const Users = require("../models/users.model");
 const RandToken = require('rand-token');
 const Authorize = require('../middleware/authorize');
+const {NotFound, BadRequest, Forbidden} = require("../middleware/http-errors");
 
 exports.register = async function (req, res, next) {
     console.log('Request to register user...');
@@ -140,27 +141,3 @@ exports.updateUser = async function(authUser, req, res, next) {
         next(err);
     }
 }
-
-
-function BadRequest(message) {
-    const err = new Error(message);
-    err.name = 'Bad Request';
-    err.status = 400;
-    return err;
-}
-
-function Forbidden() {
-    const err = new Error();
-    err.name = 'Forbidden';
-    err.status = 403;
-    return err;
-}
-
-function NotFound() {
-    const err = new Error();
-    err.name = 'Not Found';
-    err.status = 404;
-    return err;
-}
-
-

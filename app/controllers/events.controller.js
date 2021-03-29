@@ -1,8 +1,10 @@
 const Events = require('../models/events.model');
 const Crud = require('../models/crud');
+const {NotFound, BadRequest, Forbidden} = require("../middleware/http-errors");
 
 exports.list = async function(req, res) {
     console.log('Request to list events...');
+
     const startIndex = req.query.startIndex || 0;
     const count = req.query.count;
     const q = req.query.q;
@@ -25,6 +27,7 @@ exports.list = async function(req, res) {
 }
 
 exports.create = async function(authUser, req, res, next) {
+    console.log('Request to create event...');
 
     const title = req.body.title,
         description = req.body.description,
@@ -138,6 +141,8 @@ exports.delete = async function(authUser, req, res, next) {
 }
 
 exports.getCategories = async function(req, res, next) {
+    console.log('Request to get categories...');
+
     try {
         const categories = await Crud.read('category');
 
@@ -146,25 +151,4 @@ exports.getCategories = async function(req, res, next) {
     } catch (err) {
         next(err);
     }
-}
-
-function BadRequest(message) {
-    const err = new Error(message);
-    err.name = 'Bad Request';
-    err.status = 400;
-    return err;
-}
-
-function NotFound() {
-    const err = new Error();
-    err.name = 'Not Found';
-    err.status = 404;
-    return err;
-}
-
-function Forbidden() {
-    const err = new Error();
-    err.name = 'Forbidden';
-    err.status = 403;
-    return err;
 }
