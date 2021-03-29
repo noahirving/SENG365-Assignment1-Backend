@@ -1,4 +1,5 @@
 const users = require('../controllers/users.controller');
+const usersImages = require('../controllers/users.images.controller');
 const isAuthorized = require('../middleware/authorize').isAuthorized;
 
 module.exports = function (app) {
@@ -14,4 +15,7 @@ module.exports = function (app) {
     app.route(app.rootUrl + '/users/:id')
         .get(users.getUser)
         .patch(isAuthorized, users.updateUser);
+
+    app.route(app.rootUrl + '/users/:id/image')
+        .get(usersImages.get);
 }
