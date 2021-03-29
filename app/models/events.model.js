@@ -25,3 +25,23 @@ exports.selectOne = async function(id) {
 
     return result;
 }
+
+exports.countCategories = async function(ids) {
+    console.log('Request to count category ids...');
+
+    let query = `
+    select count(*) as count
+    from category
+    where id in (`
+
+    for (let i = 0; i < ids.length; i++) {
+        if (i > 0) query += ', ';
+        query += '?';
+    }
+    query += ')';
+
+    const conn = await db.getPool();
+    const [[result]] = await conn.query(query, ids);
+    return result.count;
+
+}
