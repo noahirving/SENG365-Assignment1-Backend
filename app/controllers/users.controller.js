@@ -103,6 +103,8 @@ exports.getUser = async function(req, res, next) {
 }
 
 exports.updateUser = async function(req, res, next) {
+    console.log(`Request to update user`);
+
     const firstName = req.body.firstName,
         lastName = req.body.lastName,
         email = req.body.email,
@@ -115,7 +117,9 @@ exports.updateUser = async function(req, res, next) {
     try {
         const [result] = await Users.read({'id': id});
         const token = req.get('X-Authorization');
-        if (result.auth_token === token) {
+        if (result.auth_token !== token) {
+            next(Forbidden());
+        } else {
             let data = {};
             if (firstName) data.first_name = firstName;
             if (lastName) data.last_name = lastName;
@@ -134,18 +138,13 @@ exports.updateUser = async function(req, res, next) {
                     next(BadRequest('incorrect password'));
                 }
             }
-            console.log(data);
-
             await Users.update(data, {'id': id});
             res.status(200)
                 .send();
-        } else {
-            next(Unauthorized());
         }
     } catch(err) {
         next(err);
     }
-
 }
 
 function Unauthorized() {

@@ -68,8 +68,8 @@ exports.update = async function (table, data, id) {
     where ?? = ?`;
     params.push(Object.keys(id)[0], Object.values(id)[0]);
 
-    console.log(query);
-    console.log(params);
+    //console.log(query);
+    //console.log(params);
 
     const [result] = await conn.query(query, params);
     return result;

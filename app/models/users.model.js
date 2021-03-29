@@ -7,8 +7,6 @@ exports.create = async function (data) {
 }
 
 exports.read = async function (fields) {
-    console.log(fields);
-
     return await crud.read('user', fields);
 }
 

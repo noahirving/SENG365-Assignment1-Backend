@@ -1,5 +1,6 @@
 const users = require('../controllers/users.controller');
-const authorize = require('../middleware/authorize');
+const isAuthorized = require('../middleware/authorize').isAuthorized;
+
 module.exports = function (app) {
     app.route(app.rootUrl + '/users/register')
         .post(users.register);
@@ -12,5 +13,5 @@ module.exports = function (app) {
 
     app.route(app.rootUrl + '/users/:id')
         .get(users.getUser)
-        .patch(users.updateUser);
+        .patch(isAuthorized, users.updateUser);
 }
