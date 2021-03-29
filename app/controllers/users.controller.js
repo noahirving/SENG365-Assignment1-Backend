@@ -59,13 +59,11 @@ exports.login = async function(req, res, next) {
     }
 }
 
-exports.logout = async function(req, res, next) {
+exports.logout = async function(authUser, req, res, next) {
     console.log('Request to logout...');
 
-    const token = req.get('X-Authorization');
     try {
-        const [result] = await Users.read({'auth_token': token});
-        await Users.update({'auth_token': null}, {'id': result.id});
+        await Users.update({'auth_token': null}, {'id': authUser.id});
 
         res.status(200)
             .send();
@@ -100,7 +98,7 @@ exports.getUser = async function(req, res, next) {
     }
 }
 
-exports.updateUser = async function(req, res, next) {
+exports.updateUser = async function(authUser, req, res, next) {
     console.log(`Request to update user...`);
 
     const firstName = req.body.firstName,
@@ -113,9 +111,8 @@ exports.updateUser = async function(req, res, next) {
 
     const id = req.params.id;
     try {
-        const [result] = await Users.read({'id': id});
-        const token = req.get('X-Authorization');
-        if (result.auth_token !== token) {
+
+        if (authUser.id !== id) {
             next(Forbidden());
         } else {
             let data = {};

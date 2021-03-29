@@ -24,7 +24,7 @@ exports.list = async function(req, res) {
     }
 }
 
-exports.create = async function(req, res, next) {
+exports.create = async function(authUser, req, res, next) {
 
     const title = req.body.title,
         description = req.body.description,
@@ -44,14 +44,11 @@ exports.create = async function(req, res, next) {
         } /*else if (date /*&& date > current date*) {
 
         }*/ else {
-            const token = req.get('X-Authorization');
-
-            const [result] = await Crud.read('user',{'auth_token': token});
             let data = {
                 title: title,
                 description: description,
                 date: date,
-                organizer_id: result.id
+                organizer_id: authUser.id
             }
             if (isOnline !== undefined) data.is_online = isOnline;
             if (url) data.url = url;
