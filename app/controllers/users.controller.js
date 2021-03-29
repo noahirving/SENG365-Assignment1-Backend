@@ -90,7 +90,7 @@ exports.getUser = async function(req, res, next) {
                 lastName: result.last_name
             };
 
-            if (result.auth_token === token) response.email = result.email;
+            if (token && result.auth_token === token) response.email = result.email;
 
             res.status(200)
                 .send(response);
