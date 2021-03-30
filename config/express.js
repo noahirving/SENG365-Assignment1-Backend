@@ -43,7 +43,10 @@ module.exports = function () {
     app.use((err, req, res, next) => {
 
         console.log('First pass: ' + err.status);
-        if (err.status === 401) next();
+        if (err.status === 401) {
+            err = undefined;
+            next();
+        }
         else next(err);
     });
 
@@ -73,8 +76,7 @@ module.exports = function () {
             res.statusMessage = err;
         }
         console.log(err);
-        if (err.status !== 401)
-            res.status(err.status).send('');
+        res.status(err.status).send('');
 
         //console.log(err);
     });
