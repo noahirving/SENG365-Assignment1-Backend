@@ -2,8 +2,7 @@ const Crud = require('../models/crud');
 const fs = require('mz/fs');
 const {NotFound, BadRequest, Forbidden, Unauthorized} = require("../middleware/http-errors");
 const {getAuthUser} = require('../middleware/authorize');
-const {getContentType, getExtension} = require('../controllers/helper');
-const imagePath = 'storage/images/';
+const {getContentType, getExtension, imagePath} = require('../controllers/helper');
 
 exports.get = async function(req, res, next){
     console.log('Request to get user image...');

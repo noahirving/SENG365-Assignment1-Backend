@@ -1,4 +1,6 @@
 
+exports.imagePath = 'storage/images/';
+
 exports.getContentType = function(imageName) {
     if (imageName.endsWith('.png')) return 'image/png';
     if (imageName.endsWith('.jpg')) return 'image/jpeg'

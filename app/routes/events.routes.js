@@ -12,4 +12,16 @@ module.exports = function (app) {
         .get(events.getOne)
         .patch(events.update)
         .delete(events.delete);
+
+    app.route(app.rootUrl + '/events/:id/image')
+        .get()
+        .put();
+
+    app.route(app.rootUrl + '/events/:event_id/attendees/user_id')
+        .patch();
+
+    app.route(app.rootUrl + '/events/:id/attendees')
+        .get()
+        .post()
+        .delete();
 }
