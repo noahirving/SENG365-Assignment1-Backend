@@ -13,6 +13,7 @@ module.exports = function () {
     app.use(allowCrossOriginRequestsMiddleware);
     app.use(bodyParser.json());
     app.use(bodyParser.raw({ type: 'text/plain' }));  // for the /executeSql endpoint
+    app.use(express.urlencoded({ extended: false }));
 
 
     // Validates requests using API spec
@@ -21,10 +22,10 @@ module.exports = function () {
     app.use(
         OpenApiValidator.middleware({
             apiSpec: spec,
-            validateSecurity: false,
             validateRequests: true, // (default)
             validateResponses: true, // false by default
-            validateApiSpec: false,
+            validateApiSpec: true,
+            validateSecurity: false,
             $refParser: {
                 mode: 'dereference'
             },
