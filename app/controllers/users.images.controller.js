@@ -2,7 +2,7 @@ const Crud = require('../models/crud');
 const fs = require('mz/fs');
 const {NotFound, BadRequest, Forbidden, Unauthorized} = require("../middleware/http-errors");
 const {getAuthUser} = require('../middleware/authorize');
-
+const {getContentType, getExtension} = require('../controllers/helper');
 const imagePath = 'storage/images/';
 
 exports.get = async function(req, res, next){
@@ -16,13 +16,7 @@ exports.get = async function(req, res, next){
 
         const image = await fs.readFile(imagePath + user.image_filename);
 
-        if (user.image_filename.endsWith('.png')) {
-            res.set('Content-Type', 'image/png')
-        } else if (user.image_filename.endsWith('.jpg')) {
-            res.set('Content-Type', 'image/jpeg')
-        } else {
-            res.set('Content-Type', 'image/gif')
-        }
+        res.set('Content-Type', getContentType(user.image_filename));
 
         res.status(200)
             .send(image);
@@ -45,19 +39,12 @@ exports.set = async function(req, res, next) {
         if (authUser.id !== id) return next(Forbidden());
 
         const contentType = req.get('Content-Type');
+        const extension = getExtension(contentType);
+        if (!extension) return next(BadRequest('not an accepted image type'));
 
-        let imageName = 'user_' + user.id;
-        if (contentType === 'image/png') {
-            imageName += '.png';
-        } else if (contentType === 'image/jpg') {
-            imageName += '.jpg';
-        } else if (contentType === 'image/gif') {
-            imageName += '.gif';
-        } else {
-            return next(BadRequest('not an accepted image type'));
-        }
+        const imageName = 'user_' + user.id + extension;
 
-        // Deletes the user's current image
+        // Deletes the user's current image if it exists
         if (await fs.access(imagePath + user.image_filename))
             await fs.unlink(imagePath + user.image_filename);
 
