@@ -25,5 +25,5 @@ module.exports = function (app) {
     app.route(app.rootUrl + '/events/:id/attendees')
         .get(eventsAttendees.get)
         .post(eventsAttendees.attend)
-        .delete(eventsAttendees.removeAttendance());
+        .delete(eventsAttendees.removeAttendance);
 }

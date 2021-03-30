@@ -741,8 +741,8 @@ paths:
           text/plain:
             schema:
               title: SqlCommand
-              type: string
-              example: SELECT * FROM Venue;
+              #type: string
+              #example: SELECT * FROM Venue;
       responses:
         '200':
           description: OK

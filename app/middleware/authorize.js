@@ -24,7 +24,7 @@ exports.isAuthorized = async function(req, res, next) {
 }*/
 
 exports.getAuthUser = async function(req) {
-    const token = req.get('X-Authorization');
+    const token = req.get('X-Authorization') || req.get('x-authorization');
     if (!token) return;
 
     const [authUser] = await Crud.read('user', {auth_token: token});
