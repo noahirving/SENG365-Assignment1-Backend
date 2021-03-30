@@ -40,6 +40,12 @@ module.exports = function () {
         }),
     );
 
+    app.use((err, req, res, next) => {
+
+        console.log('First pass: ' + err.status);
+        if (err.status === 401) next();
+        else next(err);
+    });
 
 
     // DEBUG (you can remove these)
