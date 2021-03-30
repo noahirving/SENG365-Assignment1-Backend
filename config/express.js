@@ -9,6 +9,9 @@ module.exports = function () {
     const app = express();
     app.rootUrl = '/api/v1';
 
+
+
+
     // MIDDLEWARE
     app.use(allowCrossOriginRequestsMiddleware);
     app.use(bodyParser.json());
