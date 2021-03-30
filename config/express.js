@@ -14,7 +14,7 @@ module.exports = function () {
     app.use(bodyParser.json());
     app.use(bodyParser.raw({ type: 'text/plain' }));  // for the /executeSql endpoint
 
-    /*
+
     // Validates requests using API spec
     const spec = path.join(__dirname, '../app/resources/seng365_event_site_api_spec.yaml');
     app.use('/spec', express.static(spec));
@@ -24,12 +24,13 @@ module.exports = function () {
             validateRequests: true, // (default)
             validateResponses: true, // false by default
             validateSecurity: false,
+            validateApiSpec: false,
             $refParser: {
                 mode: 'dereference'
             },
 
         }),
-    );*/
+    );
 
 
     // DEBUG (you can remove these)
