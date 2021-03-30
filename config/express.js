@@ -22,7 +22,7 @@ module.exports = function () {
     app.use(
         OpenApiValidator.middleware({
             apiSpec: spec,
-            validateSecurity: false,
+            //validateSecurity: false,
             $refParser: {
                 mode: 'dereference'
             },
