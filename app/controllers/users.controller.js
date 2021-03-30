@@ -77,7 +77,7 @@ exports.logout = async function(req, res, next) {
 
     try {
         const authUser = await getAuthUser(req);
-        if (!authUser) return next(Unauthorized());
+        //if (!authUser) return next(Unauthorized());
 
         // Sets auth token of user matching id to null
         await Crud.update('user', {auth_token: null}, {id: authUser.id});
