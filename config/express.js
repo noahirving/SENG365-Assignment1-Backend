@@ -17,7 +17,7 @@ module.exports = function () {
 
 
     // Validates requests using API spec
-    const spec = path.join(__dirname, '../app/resources/seng365_event_site_api_spec.yaml');
+    const spec = path.join(__dirname, '../app/resources/seng365_event_site_api_spec.json');
     app.use('/spec', express.static(spec));
     app.use(
         OpenApiValidator.middleware({
