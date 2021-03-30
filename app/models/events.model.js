@@ -59,3 +59,26 @@ exports.countAcceptedAttendees = async function(eventId){
     const [[result]] = await conn.query(query, [eventId]);
     return result.count;
 }
+
+exports.readAttendees = async function(isOrganizer, event_id, auth_id) {
+    console.log(`Request to read attendees...`);
+
+    let params = [event_id];
+    let query = `
+    select *
+    from event_attendees
+    where `;
+    if (!isOrganizer) query += '(event_id = ? and attendance_status_id = 1)'; // 1 for accepted
+    else query += 'event_id = ?';
+
+    if (auth_id) {
+        query += ' or (event_id = ? and user_id = ?)';
+        params.push(event_id);
+        params.push(auth_id);
+    }
+    query += ' order by date_of_interest';
+
+    const conn = await db.getPool();
+    const [result] = await conn.query(query, params);
+}
+

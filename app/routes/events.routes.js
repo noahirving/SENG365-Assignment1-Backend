@@ -1,5 +1,6 @@
 const events = require('../controllers/events.controller');
 const eventsImages = require('../controllers/events.images');
+const eventsAttendees = require('../controllers/events.attendees');
 
 module.exports = function (app) {
     app.route(app.rootUrl + '/events')
@@ -18,11 +19,11 @@ module.exports = function (app) {
         .get(eventsImages.get)
         .put(eventsImages.set);
 
-    app.route(app.rootUrl + '/events/:event_id/attendees/user_id')
-        .patch();
+    app.route(app.rootUrl + '/events/:event_id/attendees/:user_id')
+        .patch(eventsAttendees.changeStatus);
 
     app.route(app.rootUrl + '/events/:id/attendees')
-        .get()
-        .post()
-        .delete();
+        .get(eventsAttendees.get)
+        .post(eventsAttendees.attend)
+        .delete(eventsAttendees.removeAttendance());
 }
