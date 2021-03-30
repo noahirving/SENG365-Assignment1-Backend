@@ -1,6 +1,7 @@
 const Events = require('../models/events.model');
 const Crud = require('../models/crud');
-const {NotFound, BadRequest, Forbidden} = require("../middleware/http-errors");
+const {getAuthUser} = require("../middleware/authorize");
+const {NotFound, BadRequest, Forbidden, Unauthorized} = require("../middleware/http-errors");
 
 exports.list = async function(req, res) {
     console.log('Request to list events...');
@@ -26,7 +27,7 @@ exports.list = async function(req, res) {
     }
 }
 
-exports.create = async function(authUser, req, res, next) {
+exports.create = async function(req, res, next) {
     console.log('Request to create event...');
 
     const title = req.body.title,
@@ -41,35 +42,40 @@ exports.create = async function(authUser, req, res, next) {
         fee = req.body.fee;
 
     try {
+        // Gets authUser
+        const authUser = await getAuthUser(req);
+        // If authUser does not exist, returns unauthorized
+        if (!authUser) return next(Unauthorized());
+
+        // TODO: check for duplicate ids in categoryIds and how to respond?
+        // Counts the number of categories matching the category ids
         const categoriesCount = await Events.countCategories(categoryIds);
-        if (categoryIds.length != categoriesCount) {
-            next(BadRequest('categoriesIds not valid'));
-        } /*else if (date /*&& date > current date*) {
+        // If the number of categoryIds does not match the number of counted categories, return bad request
+        if (categoryIds.length !== categoriesCount) return next(BadRequest('categoriesIds not valid'));
 
-        }*/ else {
-            let data = {
-                title: title,
-                description: description,
-                date: date,
-                organizer_id: authUser.id
-            }
-            if (isOnline !== undefined) data.is_online = isOnline;
-            if (url) data.url = url;
-            if (venue) data.venue = venue;
-            if (capacity) data.capacity = capacity;
-            if (requiresAttendanceControl !== undefined) data.requires_attendance_control = requiresAttendanceControl;
-
-            const newEvent = await Crud.create('event', data);
-            for (const id of categoryIds) {
-                await Crud.create('event_category', {
-                    event_id: newEvent.insertId,
-                    category_id: id
-                });
-            }
-
-            res.status(201)
-                .send({eventId: newEvent.insertId});
+        let data = {
+            title: title,
+            description: description,
+            date: date,
+            organizer_id: authUser.id
         }
+        if (isOnline !== undefined) data.is_online = isOnline;
+        if (url) data.url = url;
+        if (venue) data.venue = venue;
+        if (capacity) data.capacity = capacity;
+        if (requiresAttendanceControl !== undefined) data.requires_attendance_control = requiresAttendanceControl;
+
+        const newEvent = await Crud.create('event', data);
+        for (const id of categoryIds) {
+            await Crud.create('event_category', {
+                event_id: newEvent.insertId,
+                category_id: id
+            });
+        }
+
+        res.status(201)
+            .send({eventId: newEvent.insertId});
+
     } catch (err) {
         next(err);
     }
@@ -82,33 +88,33 @@ exports.getOne = async function(req, res, next) {
     try {
         const [event] = await Crud.read('event', {id: id});
 
-        if (!event) next(NotFound());
-        else {
-            const event_categories = await Crud.read('event_category', {event_id: id});
-            const categories = event_categories.map(event_category => event_category.category_id);
-            const [organizer] = await Crud.read('user', {id: event.organizer_id});
-            const numAcceptedAttendees = await  Events.countAcceptedAttendees(event.id);
+        if (!event) return next(NotFound());
 
-            res.status(200).send({
-                eventId: event.id,
-                title: event.title,
-                categories: categories,
-                organizerFirstName: organizer.first_name,
-                organizerLastName: organizer.last_name,
-                numAcceptedAttendees: numAcceptedAttendees,
-                capacity: event.capacity,
-                description: event.description,
-                organizerId: event.organizer_id,
-                date: event.date.toISOString()
-                    .replace('T', ' ')
-                    .replace('Z', ''),
-                isOnline: Boolean(event.is_online),
-                url: event.url,
-                venue: event.venue,
-                requiresAttendanceControl: Boolean(event.requires_attendance_control),
-                fee: parseFloat(event.fee)
-            });
-        }
+        const event_categories = await Crud.read('event_category', {event_id: id});
+        const categories = event_categories.map(event_category => event_category.category_id);
+        const [organizer] = await Crud.read('user', {id: event.organizer_id});
+        const numAcceptedAttendees = await  Events.countAcceptedAttendees(event.id);
+
+        res.status(200).send({
+            eventId: event.id,
+            title: event.title,
+            categories: categories,
+            organizerFirstName: organizer.first_name,
+            organizerLastName: organizer.last_name,
+            numAcceptedAttendees: numAcceptedAttendees,
+            capacity: event.capacity,
+            description: event.description,
+            organizerId: event.organizer_id,
+            date: event.date.toISOString()
+                .replace('T', ' ')
+                .replace('Z', ''),
+            isOnline: Boolean(event.is_online),
+            url: event.url,
+            venue: event.venue,
+            requiresAttendanceControl: Boolean(event.requires_attendance_control),
+            fee: parseFloat(event.fee)
+        });
+
     } catch (err) {
         next(err);
     }
@@ -125,16 +131,14 @@ exports.delete = async function(authUser, req, res, next) {
     try {
         const [event] = await Crud.read('event', {id: id});
 
-        if (!event) {
-            next(NotFound());
-        } else if (event.organizer_id !== authUser.id) {
-            next(Forbidden());
-        } else {
-            await Crud.delete('event_attendees', {event_id: id});
-            await Crud.delete('event_category', {event_id: id});
-            await Crud.delete('event', {id: id});
-            res.status(200).send();
-        }
+        if (!event) return next(NotFound());
+        if (event.organizer_id !== authUser.id) return next(Forbidden());
+
+        await Crud.delete('event_attendees', {event_id: id});
+        await Crud.delete('event_category', {event_id: id});
+        await Crud.delete('event', {id: id});
+        res.status(200).send();
+
     } catch (err) {
         next(err);
     }

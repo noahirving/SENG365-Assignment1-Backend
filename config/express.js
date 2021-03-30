@@ -22,6 +22,7 @@ module.exports = function () {
             apiSpec: spec,
             validateRequests: true, // (default)
             validateResponses: true, // false by default
+            validateSecurity: false,
             $refParser: {
                 mode: 'dereference'
             },

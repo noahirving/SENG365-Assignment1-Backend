@@ -14,8 +14,7 @@ exports.register = async function (req, res, next) {
 
     try {
         // If email already exists #BAD REQUEST
-        if (await Users.emailExists(email)) 
-            return next(BadRequest('email already exists'));
+        if (await Users.emailExists(email)) return next(BadRequest('email already exists'));
         
         const newUser = await Crud.create('user', {
             first_name:firstName,
@@ -61,6 +60,7 @@ exports.login = async function(req, res, next) {
 }
 
 async function generateUniqueToken() {
+    console.log('Generating a unique token...');
     let token;
     let tokenUsed;
     // Gets a new token until a token is not used
@@ -76,10 +76,10 @@ exports.logout = async function(req, res, next) {
     console.log('Request to logout...');
 
     try {
-
         const authUser = await getAuthUser(req);
         if (!authUser) return next(Unauthorized());
 
+        // Sets auth token of user matching id to null
         await Crud.update('user', {auth_token: null}, {id: authUser.id});
 
         res.status(200)
@@ -158,6 +158,7 @@ exports.updateUser = async function(req, res, next) {
 
             data.password = password;
         }
+        // Updates user with matching id with new data
         await Crud.update('user', data, {id: id});
         res.status(200)
             .send();
