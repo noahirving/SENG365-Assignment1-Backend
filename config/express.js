@@ -19,6 +19,22 @@ module.exports = function () {
     app.use(express.urlencoded({ extended: false }));
 
 
+
+
+
+    // DEBUG (you can remove these)
+    app.use((req, res, next) => {
+        console.log(`##### ${req.method} ${req.path} #####`);
+        next();
+    });
+
+    app.get('/', function (req, res) {
+        res.send({ 'message': 'Hello World!' })
+    });
+
+    // ROUTES
+    require('../app/routes/backdoor.routes')(app);
+
     // Validates requests using API spec
     const spec = 'app/resources/seng365_event_site_api_spec.yaml';
 
@@ -51,18 +67,6 @@ module.exports = function () {
     });
 
 
-    // DEBUG (you can remove these)
-    app.use((req, res, next) => {
-        console.log(`##### ${req.method} ${req.path} #####`);
-        next();
-    });
-
-    app.get('/', function (req, res) {
-        res.send({ 'message': 'Hello World!' })
-    });
-
-    // ROUTES
-    require('../app/routes/backdoor.routes')(app);
     require('../app/routes/events.routes')(app);
     require('../app/routes/users.routes')(app);
 
