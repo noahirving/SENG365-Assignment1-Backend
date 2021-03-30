@@ -26,7 +26,7 @@ module.exports = function () {
     app.use(
         OpenApiValidator.middleware({
             apiSpec: spec,
-            validateSecurity: false,
+            validateSecurity: true,
             validateRequests: {
                 coerceTypes: true,
                 removeAdditional: true
@@ -73,7 +73,8 @@ module.exports = function () {
             res.statusMessage = err;
         }
         console.log(err);
-        res.status(err.status).send('');
+        if (err.status !== 401)
+            res.status(err.status).send('');
 
         //console.log(err);
     });
