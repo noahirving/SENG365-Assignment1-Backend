@@ -4,7 +4,7 @@ const isAuthorized = require('../middleware/authorize').isAuthorized;
 module.exports = function (app) {
     app.route(app.rootUrl + '/events')
         .get(events.list)
-        .post(isAuthorized, events.create);
+        //.post(isAuthorized, events.create);
 
     app.route(app.rootUrl + '/events/categories')
         .get(events.getCategories);
@@ -12,7 +12,7 @@ module.exports = function (app) {
     app.route(app.rootUrl + '/events/:id')
         .get(events.getOne)
         .patch(events.update)
-        .delete(isAuthorized, events.delete);
+        //.delete(isAuthorized, events.delete);
 
 
 }

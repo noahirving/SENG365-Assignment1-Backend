@@ -18,3 +18,10 @@ exports.NotFound = function() {
     err.status = 404;
     return err;
 }
+
+exports.Unauthorized = function() {
+    const err = new Error();
+    err.name = 'Unauthorized';
+    err.status = 401;
+    return err;
+}

@@ -1,8 +1,8 @@
 const Users = require("../models/users.model");
 const RandToken = require('rand-token');
-const Authorize = require('../middleware/authorize');
+const getAuthUser = require('../middleware/authorize').getAuthUser;
 const Crud = require('../models/crud');
-const {NotFound, BadRequest, Forbidden} = require("../middleware/http-errors");
+const {NotFound, BadRequest, Forbidden, Unauthorized} = require("../middleware/http-errors");
 
 exports.register = async function (req, res, next) {
     console.log('Request to register user...');
@@ -72,11 +72,15 @@ async function generateUniqueToken() {
     return token;
 }
 
-exports.logout = async function(authUser, req, res, next) {
+exports.logout = async function(req, res, next) {
     console.log('Request to logout...');
 
     try {
-        await Users.update({'auth_token': null}, {'id': authUser.id});
+
+        const authUser = await getAuthUser(req);
+        if (!authUser) return next(Unauthorized());
+
+        await Crud.update('user', {auth_token: null}, {id: authUser.id});
 
         res.status(200)
             .send();
@@ -88,8 +92,7 @@ exports.logout = async function(authUser, req, res, next) {
 exports.getUser = async function(req, res, next) {
     console.log('Request to get user...');
 
-    const id = req.params.id,
-        token = req.get('X-Authorization');
+    const id = req.params.id;
 
     try {
         // Gets user matching id
@@ -102,8 +105,10 @@ exports.getUser = async function(req, res, next) {
             lastName: user.last_name
         };
 
-        // If the token exists and matched the user's token add the email to the response
-        if (token && user.auth_token === token) response.email = user.email;
+        // Gets the authorized user
+        const authUser = await getAuthUser(req);
+        // If authUser exists and its id matches the user's id, add email to the response
+        if (authUser && authUser.id === user.id) response.email = user.email;
 
         res.status(200)
             .send(response);
@@ -113,22 +118,28 @@ exports.getUser = async function(req, res, next) {
     }
 }
 
-exports.updateUser = async function(authUser, req, res, next) {
+exports.updateUser = async function(req, res, next) {
     console.log(`Request to update user...`);
 
     const firstName = req.body.firstName,
         lastName = req.body.lastName,
         email = req.body.email,
         password = req.body.password,
-        currentPassword = req.body.currentPassword;
-
-    // If no new data is provided to update, returns a bad request
-    if (!(firstName || lastName || email || password)) return next(BadRequest('you must provide some details to update'));
-
-    const id = parseInt(req.params.id);
+        currentPassword = req.body.currentPassword,
+        id = parseInt(req.params.id);
     try {
+
+        const authUser = await getAuthUser(req);
+        // If user is not authorised, return unauthorised
+        if (!authUser) return next(Unauthorized());
+
         // If the authorised user's id does not match the provided id, return forbidden
         if (authUser.id !== id) return next(Forbidden());
+
+        // If no new data is provided to update, returns a bad request
+        if (!(firstName || lastName || email || password)) return next(BadRequest('you must provide some details to update'));
+
+
 
         let data = {};
         if (firstName) data.first_name = firstName;
@@ -147,7 +158,7 @@ exports.updateUser = async function(authUser, req, res, next) {
 
             data.password = password;
         }
-        await Crud.update('user', data, {'id': id});
+        await Crud.update('user', data, {id: id});
         res.status(200)
             .send();
 

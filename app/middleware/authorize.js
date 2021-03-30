@@ -1,6 +1,8 @@
 const RandToken = require("rand-token");
 const Users = require("../models/users.model");
+const Crud = require("../models/crud");
 
+/*
 exports.isAuthorized = async function(req, res, next) {
     console.log(`Checking authorisation...`);
 
@@ -19,11 +21,15 @@ exports.isAuthorized = async function(req, res, next) {
         res.status(500).send();
     }
 
+}*/
+
+exports.getAuthUser = async function(req) {
+    const token = req.get('X-Authorization');
+    if (!token) return;
+
+    const [authUser] = await Crud.read('user', {auth_token: token});
+    return authUser;
 }
 
-function Unauthorized() {
-    const err = new Error();
-    err.name = 'Unauthorized';
-    err.status = 401;
-    return err;
-}
+
+
