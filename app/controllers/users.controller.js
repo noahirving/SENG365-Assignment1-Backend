@@ -118,7 +118,7 @@ exports.getUser = async function(req, res, next) {
     }
 }
 
-exports.updateUser = async function(req, res, next) {
+exports.edit = async function(req, res, next) {
     console.log(`Request to update user...`);
 
     const firstName = req.body.firstName,
@@ -128,9 +128,12 @@ exports.updateUser = async function(req, res, next) {
         currentPassword = req.body.currentPassword,
         id = parseInt(req.params.id);
     try {
+        // If user matching id does not exist, return not found
+        const [user] = await Crud.read('user', {id: id});
+        if (!user) return next(NotFound());
 
-        const authUser = await getAuthUser(req);
         // If user is not authorised, return unauthorised
+        const authUser = await getAuthUser(req);
         if (!authUser) return next(Unauthorized());
 
         // If the authorised user's id does not match the provided id, return forbidden
@@ -138,8 +141,6 @@ exports.updateUser = async function(req, res, next) {
 
         // If no new data is provided to update, returns a bad request
         if (!(firstName || lastName || email || password)) return next(BadRequest('you must provide some details to update'));
-
-
 
         let data = {};
         if (firstName) data.first_name = firstName;

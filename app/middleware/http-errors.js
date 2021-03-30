@@ -1,5 +1,6 @@
 exports.BadRequest = function(message) {
-    const err = new Error(message);
+    const err = new Error();
+    if (message) err.message = message;
     err.name = 'Bad Request';
     err.status = 400;
     return err;
