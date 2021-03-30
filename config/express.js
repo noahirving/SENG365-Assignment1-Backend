@@ -18,17 +18,22 @@ module.exports = function () {
 
     // Validates requests using API spec
     const spec = path.join(__dirname, '../app/my_resources/seng365_event_site_api_spec.yaml');
+
     app.use('/spec', express.static(spec));
-    /*app.use(
+    app.use(
         OpenApiValidator.middleware({
             apiSpec: spec,
-            //validateSecurity: false,
+            validateSecurity: false,
+            validateRequests: false,
+            validateResponses: false,
+            coerceTypes: false,
             $refParser: {
                 mode: 'dereference'
             },
 
         }),
-    );*/
+    );
+
 
 
     // DEBUG (you can remove these)
