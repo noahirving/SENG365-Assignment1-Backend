@@ -1,6 +1,6 @@
 const Users = require("../models/users.model");
 const RandToken = require('rand-token');
-const getAuthUser = require('../middleware/authorize').getAuthUser;
+const {getAuthUser} = require('../middleware/authorize');
 const Crud = require('../models/crud');
 const {NotFound, BadRequest, Forbidden, Unauthorized} = require("../middleware/http-errors");
 
