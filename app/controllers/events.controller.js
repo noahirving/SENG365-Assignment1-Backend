@@ -65,9 +65,7 @@ exports.list = async function(req, res, next) { //TODO: add categories to search
         res.status(200)
             .send(response);
     } catch (err) {
-        res.status(500)
-            .send('Internal server error');
-        console.log(err);
+        next(err);
     }
 }
 
