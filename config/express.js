@@ -44,10 +44,7 @@ module.exports = function () {
         OpenApiValidator.middleware({
             apiSpec: spec,
             validateSecurity: false,
-            validateRequests: {
-                coerceTypes: true,
-                removeAdditional: true
-            },
+            validateRequests: true,
             validateResponses: false,
             validateApiSpec: false,
             $refParser: {
@@ -60,7 +57,7 @@ module.exports = function () {
     app.use((err, req, res, next) => {
 
         console.log('First pass: ' + err.status);
-        if (err.status === 401) {
+        if (err.status === 401 || err.status === 415) {
             err = undefined;
             next();
         }
