@@ -73,7 +73,8 @@ exports.delete = async function (req, res, next) {
         if (!user || !user.image_filename) return next(NotFound());
         if (authUser.id !== id) return next(Forbidden());
 
-        if (await fileExists(imagePath + user.image_filename)) await fs.unlink();
+        if (await fileExists(imagePath + user.image_filename))
+            await fs.unlink(imagePath + user.image_filename);
 
         await Crud.update('user', {image_filename: null}, {id: id});
 
