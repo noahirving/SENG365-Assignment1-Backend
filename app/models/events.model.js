@@ -1,19 +1,51 @@
 const db = require('../../config/db');
 
 
-exports.search = async function(startIndex, count, q, categoryIds, organizerId, sortBy) {
+exports.search = async function(data) {
     console.log(`Request to search for ${count} events starting from the ${startIndex} result...`)
 
+    const {startIndex, count, q, categoryIds, organizerId, sortBy} = data;
+
     const conn = await db.getPool();
-    const query = `
+    let params = [];
+    let query = `
     select e.id, e.title
-    from event e
-    where
-    (title like $3 or description like $3)
-    order by e.id
-    limit $1, $2`;
-    const [results] = await conn.query(query, [parseInt(startIndex), parseInt(count), q]);
-    return results;
+    from event e`;
+    //if (categoryIds.length > 0) query += ' inner join '
+    query += ` where`;
+    if (q) {
+        query += ' (title like ? or description like ?) ';
+        params.push(q);
+        params.push(q);
+    }
+    /*
+    if (categoryIds.length !== 0) {
+        if (params.length > 0) query += ' and ';
+        query += ''
+    }*/
+
+    query += ' order by ?';
+    params.push(sortBy);
+    if (organizerId !== undefined) {
+        if (params.length > 0) query += ' and ';
+        query += ' organizer_id = ? ';
+        params.push(organizerId);
+    }
+    if (startIndex !== undefined && count !== undefined) {
+        query += ' limit ?, ? ';
+        params.push(startIndex, count);
+    } else if (startIndex !== undefined) {
+        query += ' limit ?, 18446744073709551615 ';
+        params.push(startIndex);
+    } else if (count !== undefined) {
+        query += ' limit ?';
+        params.push(count);
+    }
+
+
+    const [result] = await conn.query(query, params);
+
+    `limit $1, $2`;
 };
 
 exports.selectOne = async function(id) {
