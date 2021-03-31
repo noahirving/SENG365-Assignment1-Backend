@@ -46,7 +46,8 @@ exports.attend = async function(req, res, next) {
         await Crud.create('event_attendees', {
             event_id: id,
             user_id: authUser.id,
-            date_of_interest: new Date()
+            date_of_interest: new Date(),
+            attendance_status_id: 1
         });
 
         res.status(201).send();
@@ -67,16 +68,13 @@ exports.removeAttendance = async function(req, res, next) {
         const authUser = await getAuthUser(req);
         if (!authUser) return next(Unauthorized());
 
-        const [alreadyAttending] = await Crud.read('event_attendees', {event_id: id, user_id: authUser.id});
+        const [attendee] = await Crud.read('event_attendees', {event_id: id, user_id: authUser.id});
+
+        if (!attendee || event.date < new Date() ||
+            (attendee && attendee.attendance_status_id === 3)) return next(Forbidden());
 
 
-        if (!alreadyAttending || event.date < new Date() ||
-            (alreadyAttending && alreadyAttending.attendance_status_id === 3)) return next(Forbidden());
-
-        await Crud.update('event_attendees', {
-            event_id: id,
-            user_id: authUser.id
-        });
+        await Crud.delete('event_attendees', {id: attendee.id});
         res.status(200).send();
     } catch (err) {
         next(err)
