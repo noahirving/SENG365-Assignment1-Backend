@@ -89,7 +89,7 @@ exports.removeAttendance = async function(req, res, next) {
             (attendee && attendee.attendance_status_id === 3)) return next(Forbidden());
 
 
-        await Crud.update('event_attendees', {attendance_status_id: 3}, {user_id: authUser.id});
+        await Crud.delete('event_attendees', {user_id: authUser.id});
         res.status(200).send();
     } catch (err) {
         next(err)
