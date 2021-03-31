@@ -59,7 +59,7 @@ exports.list = async function(req, res, next) { //TODO: add attendees count to o
                 obj.organizerFirstName = r.first_name;
                 obj.organizerLastName = r.last_name;
                 obj.numAcceptedAttendees = await Events.countAcceptedAttendees(r.id);
-                if (r.capacity) obj.capacity = r.capacity;
+                obj.capacity = r.capacity;
                 response.push(obj);
         }
         res.status(200)
