@@ -12,9 +12,18 @@ exports.search = async function(data) {
     select e.id, e.title, u.first_name, u.last_name, e.capacity 
     from event e
     inner join user u on e.organizer_id = u.id `;
-    //if (categoryIds.length > 0) query += ' inner join '
     if (q || categoryIds || organizerId) query += ` where `;
+    if (categoryIds.length > 0) {
+        query += ' exists (select * from event_category ec where ec.event_id = e.id and ec.category_id in ('
+        for (const catId of categoryIds) {
+            if (params.length > 0) query += ',';
+            query += '?';
+            params.push(catId);
+        }
+        query += ')) '
+    }
     if (q) {
+        if (params.length > 0) query += ' and ';
         query += ` (title like ? or description like ?) `;
         params.push(`%${q}%`, `%${q}%`);
     }

@@ -3,7 +3,7 @@ const Crud = require('../models/crud');
 const {getAuthUser} = require("../middleware/authorize");
 const {NotFound, BadRequest, Forbidden, Unauthorized} = require("../middleware/http-errors");
 
-exports.list = async function(req, res, next) { //TODO: add categories to search
+exports.list = async function(req, res, next) { //TODO: add attendees count to order by
     console.log('Request to list events...');
 
     const startIndex = req.query.startIndex,
