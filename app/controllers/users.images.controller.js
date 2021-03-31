@@ -37,17 +37,15 @@ exports.set = async function(req, res, next) {
         if (!user) return next(NotFound());
         if (authUser.id !== id) return next(Forbidden());
 
-        const contentType = req.get('Content-Type');
+        const contentType = req.get('Content-Type') || req.get('content-type');
         const extension = getExtension(contentType);
         if (!extension) return next(BadRequest('not an accepted image type'));
 
         const imageName = 'user_' + user.id + extension;
 
         // Deletes the user's current image if it exists
-        if (await fs.access(imagePath + user.image_filename))
-            await fs.unlink(imagePath + user.image_filename);
-
         const status = user.image_filename ? 200 : 201;
+        if (user.image_filename) await fs.unlink(imagePath + user.image_filename);
         await Crud.update('user', {image_filename: null}, {id: id});
 
         await fs.writeFile(imagePath + imageName, req.body);
