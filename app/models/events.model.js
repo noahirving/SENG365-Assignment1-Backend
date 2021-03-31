@@ -9,7 +9,9 @@ exports.search = async function(data) {
     const conn = await db.getPool();
     let params = [];
     let query = `
-    select e.id, e.title, u.first_name, u.last_name, e.capacity 
+    select e.id, e.title, u.first_name, u.last_name, e.capacity,
+        (select count (*) from event_attendees ea
+        where ea.attendance_status_id = 1 and ea.event_id = e.id) as attendees
     from event e
     inner join user u on e.organizer_id = u.id `;
     if (q || categoryIds || organizerId) query += ` where `;
@@ -27,11 +29,6 @@ exports.search = async function(data) {
         query += ` (title like ? or description like ?) `;
         params.push(`%${q}%`, `%${q}%`);
     }
-    /*
-    if (categoryIds.length !== 0) {
-        if (params.length > 0) query += ' and ';
-        query += ''
-    }*/
 
 
     if (organizerId !== undefined) {

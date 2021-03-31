@@ -3,7 +3,7 @@ const Crud = require('../models/crud');
 const {getAuthUser} = require("../middleware/authorize");
 const {NotFound, BadRequest, Forbidden, Unauthorized} = require("../middleware/http-errors");
 
-exports.list = async function(req, res, next) { //TODO: add attendees count to order by
+exports.list = async function(req, res, next) {
     console.log('Request to list events...');
 
     const startIndex = req.query.startIndex,
@@ -58,7 +58,7 @@ exports.list = async function(req, res, next) { //TODO: add attendees count to o
                 obj.categories = (await Crud.read('event_category', {event_id: r.id})).map(cat => cat.category_id);
                 obj.organizerFirstName = r.first_name;
                 obj.organizerLastName = r.last_name;
-                obj.numAcceptedAttendees = await Events.countAcceptedAttendees(r.id);
+                obj.numAcceptedAttendees = r.attendees;
                 obj.capacity = r.capacity;
                 response.push(obj);
         }
