@@ -3,20 +3,51 @@ const Crud = require('../models/crud');
 const {getAuthUser} = require("../middleware/authorize");
 const {NotFound, BadRequest, Forbidden, Unauthorized} = require("../middleware/http-errors");
 
-exports.list = async function(req, res) {
+exports.list = async function(req, res, next) {
     console.log('Request to list events...');
 
-    const startIndex = req.query.startIndex || 0;
-    const count = req.query.count;
-    const q = req.query.q;
-    const categoryIds = req.query.categoryids;
-    const organizerId = req.query.organizerId;
-    const sortBy = req.query.sortby;
+    const startIndex = req.query.startIndex,
+        count = req.query.count,
+        q = req.query.q,
+        categoryIds = req.query.categoryIds,
+        organizerId = req.query.organizerId,
+        sortBy = req.query.sortBy;
 
+    console.log(categoryIds);
     //if count is 0 or missing throw bad request? should it have a default value?
 
     try {
-        const results = await Events.search(startIndex, count, q, categoryIds, organizerId, sortBy);
+        // Checks all categories exist
+        if (categoryIds) {
+            for (const id of categoryIds) {
+                const [category] = await Crud.read('category', {id: id});
+                if (!category) return next(BadRequest('category does not exist'));
+            }
+        }
+
+        const orders = {
+            'ALPHABETICAL_ASC': 'title',
+            'ALPHABETICAL_DESC': 'title desc',
+            undefined: 'date',
+            'DATE_ASC': 'date',
+            'DATE_DESC': 'date desc',
+            'ATTENDEES_ASC': 'attendees',
+            'ATTENDEES_DESC': 'attendees desc',
+            'CAPACITY_ASC': 'capacity',
+            'CAPACITY_DESC': 'capacity desc'
+        }
+
+
+
+        const data = {
+            startIndex: startIndex,
+            count: count,
+            q: q,
+            categoryIds: categoryIds,
+            organizerId: organizerId,
+            sortBy: orders[sortBy]
+        }
+        const results = await Events.search(data);
 
         res.status(200)
             .send(results);
