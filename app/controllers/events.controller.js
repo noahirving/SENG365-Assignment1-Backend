@@ -3,7 +3,7 @@ const Crud = require('../models/crud');
 const {getAuthUser} = require("../middleware/authorize");
 const {NotFound, BadRequest, Forbidden, Unauthorized} = require("../middleware/http-errors");
 
-exports.list = async function(req, res, next) {
+exports.list = async function(req, res, next) { //TODO: add categories to search
     console.log('Request to list events...');
 
     const startIndex = req.query.startIndex,
@@ -49,8 +49,21 @@ exports.list = async function(req, res, next) {
         }
         const results = await Events.search(data);
 
+        const response = [];
+        for (const r of results) {
+                const obj = {
+                    eventId: r.id,
+                    title: r.title,
+                }
+                obj.categories = (await Crud.read('event_category', {event_id: r.id})).map(cat => cat.category_id);
+                obj.organizerFirstName = r.first_name;
+                obj.organizerLastName = r.last_name;
+                obj.numAcceptedAttendees = await Events.countAcceptedAttendees(r.id);
+                if (r.capacity) obj.capacity = r.capacity;
+                response.push(obj);
+        }
         res.status(200)
-            .send(results);
+            .send(response);
     } catch (err) {
         res.status(500)
             .send('Internal server error');

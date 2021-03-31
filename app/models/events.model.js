@@ -9,8 +9,9 @@ exports.search = async function(data) {
     const conn = await db.getPool();
     let params = [];
     let query = `
-    select id, title, description, date
-    from event `;
+    select e.id, e.title, u.first_name, u.last_name, e.capacity 
+    from event e
+    inner join user u on e.organizer_id = u.id `;
     //if (categoryIds.length > 0) query += ' inner join '
     if (q || categoryIds || organizerId) query += ` where `;
     if (q) {
