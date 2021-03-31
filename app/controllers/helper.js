@@ -1,4 +1,4 @@
-
+const fs = require('mz/fs');
 exports.imagePath = 'storage/images/';
 
 exports.getContentType = function(imageName) {
@@ -14,3 +14,11 @@ exports.getExtension = function(contentType) {
     return undefined;
 }
 
+exports.fileExists = async function (filePath) {
+    try {
+        await fs.access(filePath);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}

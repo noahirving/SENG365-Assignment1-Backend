@@ -1,8 +1,9 @@
 const Events = require('../models/events.model');
 const Crud = require('../models/crud');
+const fs = require('mz/fs');
 const {getAuthUser} = require("../middleware/authorize");
 const {NotFound, BadRequest, Forbidden, Unauthorized} = require("../middleware/http-errors");
-const {getContentType, getExtension, imagePath} = require('../controllers/helper');
+const {getContentType, getExtension, fileExists, imagePath} = require('../controllers/helper');
 
 exports.get = async function(req, res, next) {
     console.log('Request to get event image...');
@@ -44,16 +45,16 @@ exports.set = async function(req, res, next) {
         const imageName = 'event_' + event.id + extension;
 
         // Deletes the user's current image if it exists
-        if (await fs.access(imagePath + event.image_filename))
+        if (event.image_filename && await fileExists(imagePath + event.image_filename))
             await fs.unlink(imagePath + event.image_filename);
 
-        const status = event.image_filename ? 200 : 201;
+        //const status = event.image_filename ? 200 : 201;
         await Crud.update('event', {image_filename: null}, {id: id});
 
         await fs.writeFile(imagePath + imageName, req.body);
         await Crud.update('event', {image_filename: imageName}, {id: id});
 
-        res.status(status)
+        res.status(200)
             .send();
 
     } catch (err) {
