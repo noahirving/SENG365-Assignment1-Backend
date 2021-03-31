@@ -14,11 +14,12 @@ module.exports = function () {
 
     // MIDDLEWARE
     app.use(allowCrossOriginRequestsMiddleware);
-    app.use(bodyParser.json());
+    app.use(bodyParser.json({limit: '100mb'}));
     app.use(bodyParser.raw({
         type: ['text/plain', 'image/png', 'image/jpeg', 'image/gif'],
-        limit: '50mb'
+        limit: '100mb'
     }));
+
     //app.use(bodyParser({limit: '50mb'}))
     app.use(express.urlencoded({ extended: false }));
 
