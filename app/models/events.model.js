@@ -65,8 +65,9 @@ exports.readAttendees = async function(isOrganizer, event_id, auth_id) {
 
     let params = [event_id];
     let query = `
-    select *
-    from event_attendees
+    select ea.id, ea.attendance_status_id, u.first_name, u.last_name, ea.date_of_interest
+    from event_attendees ea
+    inner join user u on ea.user_id = u.id 
     where `;
     if (!isOrganizer) query += '(event_id = ? and attendance_status_id = 1)'; // 1 for accepted
     else query += 'event_id = ?';
@@ -78,10 +79,12 @@ exports.readAttendees = async function(isOrganizer, event_id, auth_id) {
     }
     query += ' order by date_of_interest';
 
-    //console.log(query);
-    //console.log(params);
+    console.log(query);
+    console.log(params);
     const conn = await db.getPool();
     const [results] = await conn.query(query, params);
     return results;
 }
+
+
 

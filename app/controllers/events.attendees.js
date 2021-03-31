@@ -9,10 +9,12 @@ exports.get = async function(req, res, next){
 
     const id = req.params.id;
     try {
-        const authUser = await getAuthUser(req);
         const [event] = await Crud.read('event', {id: id});
         if (!event) return next(NotFound());
 
+
+
+        const authUser = await getAuthUser(req);
         let attendees;
         if (authUser) {
             attendees = await Events.readAttendees(authUser.id === event.organizer_id, event.id, authUser.id);
@@ -20,8 +22,21 @@ exports.get = async function(req, res, next){
             attendees = await Events.readAttendees(false, event.id, undefined);
         }
 
+        const statuses = {'1':'accepted', '2': 'pending', '3': 'rejected'};
+        let response = [];
+        for (const a of attendees) {
+            response.push({
+                attendeesId: a.id,
+                status: statuses[a.attendance_status_id],
+                firstName: a.first_name,
+                lastName: a.last_name,
+                dateOfInterest: a.date_of_interest
+            })
+        }
+
         res.status(200)
-            .send(attendees);
+            .send(response);
+
 
     } catch (err) {
         next(err)
