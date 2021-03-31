@@ -40,17 +40,16 @@ exports.attend = async function(req, res, next) {
         const authUser = await getAuthUser(req);
         if (!authUser) return next(Unauthorized());
 
-        const alreadyAttending = await Crud.read('event_attendees', {event_id: id, user_id: authUser.id});
+        const [alreadyAttending] = await Crud.read('event_attendees', {event_id: id, user_id: authUser.id});
         if (alreadyAttending || event.date < new Date()) return next(Forbidden());
 
         await Crud.create('event_attendees', {
             event_id: id,
             user_id: authUser.id,
             date_of_interest: new Date()
-
         });
 
-        res.status(200).send();
+        res.status(201).send();
     } catch (err) {
         next(err)
     }
