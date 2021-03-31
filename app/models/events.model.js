@@ -78,7 +78,10 @@ exports.readAttendees = async function(isOrganizer, event_id, auth_id) {
     }
     query += ' order by date_of_interest';
 
+    //console.log(query);
+    //console.log(params);
     const conn = await db.getPool();
-    const [result] = await conn.query(query, params);
+    const [results] = await conn.query(query, params);
+    return results;
 }
 
