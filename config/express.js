@@ -17,7 +17,8 @@ module.exports = function () {
     app.use(bodyParser.json());
     app.use(bodyParser.raw({
         type: ['text/plain', 'image/png', 'image/jpeg', 'image/gif']
-    }));  // for the /executeSql endpoint
+    }));
+    app.use(bodyParser({limit: '50mb'}))
     app.use(express.urlencoded({ extended: false }));
 
     // DEBUG (you can remove these)
@@ -40,7 +41,7 @@ module.exports = function () {
     app.use(
         OpenApiValidator.middleware({
             apiSpec: spec,
-            validateSecurity: true,
+            validateSecurity: false,
             validateRequests: {
                 coerceTypes: true,
                 removeAdditional: true
