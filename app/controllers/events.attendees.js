@@ -26,7 +26,7 @@ exports.get = async function(req, res, next){
         let response = [];
         for (const a of attendees) {
             response.push({
-                attendeesId: a.id,
+                attendeeId: a.id,
                 status: statuses[a.attendance_status_id],
                 firstName: a.first_name,
                 lastName: a.last_name,
