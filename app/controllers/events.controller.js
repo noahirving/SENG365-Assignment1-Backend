@@ -151,8 +151,63 @@ exports.getOne = async function(req, res, next) {
     }
 }
 
-exports.update = async function(req, res) {
+exports.edit = async function(req, res, next) {
+    console.log('Request to edit an event...');
 
+    const title = req.body.title,
+        description = req.body.description,
+        categoryIds = req.body.categoryIds,
+        date = req.body.date, //TODO: date required?
+        isOnline = req.body.isOnline,
+        url = req.body.url,
+        venue = req.body.venue,
+        capacity = req.body.capacity,
+        requiresAttendanceControl = req.body.requiresAttendanceControl,
+        fee = req.body.fee;
+
+    const id = req.params.id;
+    try {
+
+        //TODO: check for event existence first or category existence?
+        const [event] = await Crud.read('event', {id: id});
+        if (!event) return next(NotFound());
+
+        if (categoryIds) {
+            for (const catId of categoryIds) {
+                const [result] = await Crud.read('category', {id: catId});
+                if (!result) return next(BadRequest('category does not exist'));
+            }
+        }
+
+        const authUser = await getAuthUser(req);
+        if (!authUser) return next(Unauthorized());
+
+        console.log(authUser);
+        console.log(event.organizer_id);
+        if (authUser.id !== event.organizer_id) return next(Forbidden());
+
+        const data = {};
+        if (title) data.title = title;
+        if (description) data.description = description;
+        if (date) data.date = date;
+        if (isOnline) data.is_online = isOnline;
+        if (url) data.url = url;
+        if (venue) data.venue = venue;
+        if (capacity) data.capacity = capacity;
+        if (requiresAttendanceControl) data.requires_attendance_control = requiresAttendanceControl;
+        if (fee) data.fee = fee;
+        await Crud.update('event', data, {id: id});
+        if (categoryIds) {
+            await Crud.delete('event_category', {event_id: id});
+            for (const catId of categoryIds) {
+                await Crud.create('event_category', {event_id: id, category_id: catId});
+            }
+        }
+        res.status(200).send();
+
+    } catch (err) {
+        next(err);
+    }
 }
 
 exports.delete = async function(authUser, req, res, next) {

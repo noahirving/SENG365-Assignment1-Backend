@@ -12,7 +12,7 @@ module.exports = function (app) {
 
     app.route(app.rootUrl + '/events/:id')
         .get(events.getOne)
-        .patch(events.update)
+        .patch(events.edit)
         .delete(events.delete);
 
     app.route(app.rootUrl + '/events/:id/image')
