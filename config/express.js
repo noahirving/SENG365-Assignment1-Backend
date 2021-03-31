@@ -16,9 +16,10 @@ module.exports = function () {
     app.use(allowCrossOriginRequestsMiddleware);
     app.use(bodyParser.json());
     app.use(bodyParser.raw({
-        type: ['text/plain', 'image/png', 'image/jpeg', 'image/gif']
+        type: ['text/plain', 'image/png', 'image/jpeg', 'image/gif'],
+        limit: '50mb'
     }));
-    app.use(bodyParser({limit: '50mb'}))
+    //app.use(bodyParser({limit: '50mb'}))
     app.use(express.urlencoded({ extended: false }));
 
     // DEBUG (you can remove these)
