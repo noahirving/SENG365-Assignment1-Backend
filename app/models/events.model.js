@@ -13,7 +13,7 @@ exports.search = async function(data) {
     from event e
     inner join user u on e.organizer_id = u.id `;
     if (q || categoryIds || organizerId) query += ` where `;
-    if (categoryIds.length > 0) {
+    if (categoryIds && categoryIds.length > 0) {
         query += ' exists (select * from event_category ec where ec.event_id = e.id and ec.category_id in ('
         for (const catId of categoryIds) {
             if (params.length > 0) query += ',';
