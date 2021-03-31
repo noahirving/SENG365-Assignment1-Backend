@@ -109,7 +109,7 @@ exports.changeStatus = async function(req, res, next) {
 
         if(statusNums[status] === undefined) return next(BadRequest('status does not exist'));
 
-        const authUser = getAuthUser();
+        const authUser = await getAuthUser(req);
         if (!authUser) return next(Unauthorized());
 
         const [event] = await Crud.read('event', {id: event_id});
@@ -117,6 +117,7 @@ exports.changeStatus = async function(req, res, next) {
 
         await Crud.update('event_attendees', {attendance_status_id: statusNums[status]}, {id: attendee.id});
 
+        res.status(200).send();
     } catch (err) {
         next(err);
     }
