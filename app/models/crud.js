@@ -60,7 +60,7 @@ exports.update = async function (table, data, id) {
     update ??
     set `;
     for (let key in data) {
-        if (key == Object.keys(id)[0]) continue;
+        //if (key == Object.keys(id)[0]) continue;
         if (params.length > 1) query += ', ';
         query += '?? = ?';
         params.push(key);
