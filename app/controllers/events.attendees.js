@@ -9,9 +9,14 @@ exports.get = async function(req, res, next){
 
     const id = req.params.id;
     try {
+        // Checks event was found
         const [event] = await Crud.read('event', {id: id});
         if (!event) return next(NotFound());
 
+        // Gets the attendees
+        // If the authorized user is the event organizer shows all attendees
+        // Otherwise shows all accepted attendees
+        // Additionally shows the authorized user if they are an attendee no matter their status
         const authUser = await getAuthUser(req);
         let attendees;
         if (authUser) {
@@ -20,6 +25,7 @@ exports.get = async function(req, res, next){
             attendees = await Events.readAttendees(false, event.id, undefined);
         }
 
+        // Builds response
         const statuses = {'1':'accepted', '2': 'pending', '3': 'rejected'};
         let response = [];
         for (const a of attendees) {
@@ -32,10 +38,7 @@ exports.get = async function(req, res, next){
             })
         }
 
-        res.status(200)
-            .send(response);
-
-
+        res.status(200).send(response);
     } catch (err) {
         next(err)
     }
@@ -46,13 +49,15 @@ exports.attend = async function(req, res, next) {
 
     const id = parseInt(req.params.id);
     try {
-
+        // Gets the event by id, if it does not exist #NOT FOUND
         const [event] = await Crud.read('event', {id: id});
         if (!event) return next(NotFound());
 
+        // Gets the authorized user, if they are not authenticated #UNAUTHORIZED
         const authUser = await getAuthUser(req);
         if (!authUser) return next(Unauthorized());
 
+        // Checks if
         const [alreadyAttending] = await Crud.read('event_attendees', {event_id: id, user_id: authUser.id});
         if (alreadyAttending || event.date < new Date()) return next(Forbidden());
 

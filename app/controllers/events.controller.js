@@ -13,9 +13,6 @@ exports.list = async function(req, res, next) {
         organizerId = req.query.organizerId,
         sortBy = req.query.sortBy;
 
-    console.log(categoryIds);
-    //if count is 0 or missing throw bad request? should it have a default value?
-
     try {
         // Checks all categories exist
         if (categoryIds) {
@@ -67,13 +64,15 @@ exports.list = async function(req, res, next) {
     }
 }
 
+// NOTE:
+// Reference server does not check for duplicate categoryIds
 exports.create = async function(req, res, next) {
     console.log('Request to create event...');
 
     const title = req.body.title,
         description = req.body.description,
         categoryIds = req.body.categoryIds,
-        date = req.body.date || new Date().toISOString(),
+        date = req.body.date,
         isOnline = req.body.isOnline,
         url = req.body.url,
         venue = req.body.venue,
@@ -82,17 +81,16 @@ exports.create = async function(req, res, next) {
         fee = req.body.fee;
 
     try {
-        // Gets authUser
+        // Gets authUser, if authUser does not exist #UNAUTHORIZED
         const authUser = await getAuthUser(req);
-        // If authUser does not exist, returns unauthorized
         if (!authUser) return next(Unauthorized());
 
-        // TODO: check for duplicate ids in categoryIds and how to respond?
-        // Counts the number of categories matching the category ids
+        // Counts the number of categories matching the category ids, if the counts do not match #BAD REQUEST
+        // NOTE: Reference server throws an Internal Server error when non unique ids are given, I throw a Bad Request
         const categoriesCount = await Events.countCategories(categoryIds);
-        // If the number of categoryIds does not match the number of counted categories, return bad request
         if (categoryIds.length !== categoriesCount) return next(BadRequest('categoriesIds not valid'));
 
+        // Builds event to create
         let data = {
             title: title,
             description: description,
@@ -105,7 +103,9 @@ exports.create = async function(req, res, next) {
         if (capacity) data.capacity = capacity;
         if (requiresAttendanceControl !== undefined) data.requires_attendance_control = requiresAttendanceControl;
 
+        // Creates event
         const newEvent = await Crud.create('event', data);
+        // Creates event_category entries for each categoryId
         for (const id of categoryIds) {
             await Crud.create('event_category', {
                 event_id: newEvent.insertId,
@@ -113,9 +113,7 @@ exports.create = async function(req, res, next) {
             });
         }
 
-        res.status(201)
-            .send({eventId: newEvent.insertId});
-
+        res.status(201).send({eventId: newEvent.insertId});
     } catch (err) {
         next(err);
     }
@@ -126,15 +124,17 @@ exports.getOne = async function(req, res, next) {
 
     const id = req.params.id;
     try {
+        // Gets authUser, if authUser does not exist #NOT FOUND
         const [event] = await Crud.read('event', {id: id});
-
         if (!event) return next(NotFound());
 
+        // Gets data
         const event_categories = await Crud.read('event_category', {event_id: id});
         const categories = event_categories.map(event_category => event_category.category_id);
         const [organizer] = await Crud.read('user', {id: event.organizer_id});
         const numAcceptedAttendees = await  Events.countAcceptedAttendees(event.id);
 
+        // Builds and send data
         res.status(200).send({
             eventId: event.id,
             title: event.title,
@@ -166,7 +166,7 @@ exports.edit = async function(req, res, next) {
     const title = req.body.title,
         description = req.body.description,
         categoryIds = req.body.categoryIds,
-        date = req.body.date, //TODO: date required?
+        date = req.body.date,
         isOnline = req.body.isOnline,
         url = req.body.url,
         venue = req.body.venue,
@@ -177,16 +177,16 @@ exports.edit = async function(req, res, next) {
     const id = req.params.id;
     try {
 
-        //TODO: check for event existence first or category existence?
         const [event] = await Crud.read('event', {id: id});
         if (!event) return next(NotFound());
 
         if (categoryIds) {
             for (const catId of categoryIds) {
                 const [result] = await Crud.read('category', {id: catId});
-                if (!result) return next(BadRequest('category does not exist'));
+                if (!result) return next(BadRequest('at least one categoryId does not match any existing category'));
             }
         }
+        if (date && new Date(date) < new Date()) return next(BadRequest('event date must be in the future'));
 
         const authUser = await getAuthUser(req);
         if (!authUser) return next(Unauthorized());
