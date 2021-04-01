@@ -1,4 +1,3 @@
-const Users = require("../models/users.model");
 const RandToken = require('rand-token');
 const {getAuthUser} = require('../middleware/authorize');
 const Crud = require('../models/crud');
@@ -15,7 +14,8 @@ exports.register = async function (req, res, next) {
 
     try {
         // If email already exists #BAD REQUEST
-        if (await Users.emailExists(email)) return next(BadRequest('email already exists'));
+        const [userWithEmail] = await Crud.read('user', {email: email});
+        if (userWithEmail) return next(BadRequest('email already exists'));
 
         const hashedPassword = await Passwords.hash(password);
         const newUser = await Crud.create('user', {
