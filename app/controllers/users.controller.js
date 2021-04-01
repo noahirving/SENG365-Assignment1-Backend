@@ -19,7 +19,8 @@ exports.register = async function (req, res, next) {
         // If email already exists #BAD REQUEST
         if (await Users.emailExists(email)) return next(BadRequest('email already exists'));
 
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password, salt);
         const newUser = await Crud.create('user', {
             first_name:firstName,
             last_name:lastName,
@@ -161,7 +162,8 @@ exports.edit = async function(req, res, next) {
             // If the current password does no match the auth user's password, return bad request
             if (!(await bcrypt.compare(currentPassword, authUser.password))) return next(BadRequest('incorrect password'));
 
-            data.password = await bcrypt.hash(password, saltRounds);
+            const salt = await bcrypt.genSalt(saltRounds);
+            data.password = await bcrypt.hash(password, salt);
         }
         // Updates user with matching id with new data
         await Crud.update('user', data, {id: id});
