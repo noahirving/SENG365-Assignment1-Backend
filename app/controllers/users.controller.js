@@ -3,9 +3,7 @@ const RandToken = require('rand-token');
 const {getAuthUser} = require('../middleware/authorize');
 const Crud = require('../models/crud');
 const {NotFound, BadRequest, Forbidden, Unauthorized} = require("../middleware/http-errors");
-
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
+const Passwords = require('../middleware/passwords');
 
 exports.register = async function (req, res, next) {
     console.log('Request to register user...');
@@ -19,8 +17,7 @@ exports.register = async function (req, res, next) {
         // If email already exists #BAD REQUEST
         if (await Users.emailExists(email)) return next(BadRequest('email already exists'));
 
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = await Passwords.hash(password);
         const newUser = await Crud.create('user', {
             first_name:firstName,
             last_name:lastName,
@@ -44,7 +41,7 @@ exports.login = async function(req, res, next) {
     try {
         // Gets user with matching email and password as those passed in the request
         const [user] = await Crud.read('user', {email: email});
-        if (!(user && (await bcrypt.compare(password, user.password)))) return next(BadRequest('Invalid email or password'));
+        if (!(user && (await Passwords.compare(password, user.password)))) return next(BadRequest('Invalid email or password'));
 
         // Generates a unique token
         const token = await generateUniqueToken();
@@ -160,10 +157,9 @@ exports.edit = async function(req, res, next) {
         }
         if (password) {
             // If the current password does no match the auth user's password, return bad request
-            if (!(await bcrypt.compare(currentPassword, authUser.password))) return next(BadRequest('incorrect password'));
+            if (!(await Passwords.compare(currentPassword, authUser.password))) return next(BadRequest('incorrect password'));
 
-            const salt = await bcrypt.genSalt(saltRounds);
-            data.password = await bcrypt.hash(password, salt);
+            data.password = await Passwords.hash(password);
         }
         // Updates user with matching id with new data
         await Crud.update('user', data, {id: id});
