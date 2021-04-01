@@ -72,7 +72,6 @@ exports.update = async function (table, data, id) {
 
     //console.log(query);
     //console.log(params);
-
     const [result] = await conn.query(query, params);
     return result;
 }

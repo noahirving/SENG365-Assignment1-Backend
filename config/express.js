@@ -1,16 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const OpenApiValidator = require("express-openapi-validator");
-const path = require("path");
 const { allowCrossOriginRequestsMiddleware } = require('../app/middleware/cors.middleware');
 
 module.exports = function () {
     // INITIALISE EXPRESS //
     const app = express();
     app.rootUrl = '/api/v1';
-
-
-
 
     // MIDDLEWARE
     app.use(allowCrossOriginRequestsMiddleware);
@@ -38,7 +34,6 @@ module.exports = function () {
 
     // Validates requests using API spec
     const spec = 'app/resources/seng365_event_site_api_spec.yaml';
-
     app.use('/spec', express.static(spec));
     app.use(
         OpenApiValidator.middleware({
@@ -49,8 +44,7 @@ module.exports = function () {
             validateApiSpec: false,
             $refParser: {
                 mode: 'dereference'
-            },
-
+            }
         }),
     );
 

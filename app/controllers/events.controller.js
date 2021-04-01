@@ -37,8 +37,6 @@ exports.list = async function(req, res, next) {
             'CAPACITY_DESC': 'capacity desc'
         }
 
-
-
         const data = {
             startIndex: startIndex,
             count: count,

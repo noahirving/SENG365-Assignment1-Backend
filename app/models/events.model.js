@@ -1,6 +1,5 @@
 const db = require('../../config/db');
 
-
 exports.search = async function(data) {
     console.log(`Request to search for events...`)
 
@@ -50,23 +49,11 @@ exports.search = async function(data) {
         params.push(count);
     }
 
-
-    console.log(query);
-    console.log(params);
+    //console.log(query);
+    //console.log(params);
     const [results] = await conn.query(query, params);
-    console.log(results);
     return results;
 };
-
-exports.selectOne = async function(id) {
-    console.log(`Request to select event '${id}'...`);
-
-    const conn = await db.getPool();
-    const query = 'select * from event where id = ?';
-    const [result] = await conn.query(query, [id]);
-
-    return result;
-}
 
 exports.countCategories = async function(ids) {
     console.log('Request to count category ids...');
@@ -114,15 +101,15 @@ exports.readAttendees = async function(isOrganizer, event_id, auth_id) {
     if (!isOrganizer) query += '(event_id = ? and attendance_status_id = 1)'; // 1 for accepted
     else query += 'event_id = ?';
 
-    if (auth_id) {
+    if (auth_id !== undefined) {
         query += ' or (event_id = ? and user_id = ?)';
         params.push(event_id);
         params.push(auth_id);
     }
     query += ' order by date_of_interest';
 
-    console.log(query);
-    console.log(params);
+    //console.log(query);
+    //console.log(params);
     const conn = await db.getPool();
     const [results] = await conn.query(query, params);
     return results;
