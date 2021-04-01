@@ -12,8 +12,6 @@ exports.get = async function(req, res, next){
         const [event] = await Crud.read('event', {id: id});
         if (!event) return next(NotFound());
 
-
-
         const authUser = await getAuthUser(req);
         let attendees;
         if (authUser) {
